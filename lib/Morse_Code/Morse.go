@@ -1,6 +1,7 @@
 package morsecode
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -52,32 +53,40 @@ var morsemap = map[string]string{
 	")": "-.--.-",
 }
 
-func Encode(words string) (string) {
+func Encode(words string) string {
 	res := ""
-	for _, words := range strings.Split(words, "   ") {
-		for  _, v := range strings.Split(words, " ") {
-			for  k, c := range morsemap {
-				if c == v { 
-					res += string(k)
+	for _, word := range strings.Split(words, "   ") {
+		for _, v := range strings.Split(word, " ") {
+			for k, val := range morsemap {
+				if val == v {
+					res += k
 				}
 			}
 		}
+		res += "   "
 	}
-	return res
+	return strings.TrimSuffix(res, "   ")
 }
 
-func Decode(words string) (string) {
+func Decode(words string) (string, error) {
+	if words == "" {
+		return "", nil
+	}
+
 	res := ""
-	for _, v := range strings.Split(words, " ") {
-		for k, c := range v {
-			if val, ok := morsemap[string(c)]; ok {
+	for _, word := range strings.Split(words, "   ") {
+		if len(word) > 0 {
+			for _, c := range word {
+				val, ok := morsemap[string(c)]
+				if !ok {
+					return "", fmt.Errorf("unknown character: %s", string(c))
+				}
 				res += val
-				if k < len(v) - 1 {
+				if c != rune(word[len(word)-1]) {
 					res += " "
 				}
 			}
 		}
 	}
-	return res
+	return strings.TrimSuffix(res, " "), nil
 }
-
